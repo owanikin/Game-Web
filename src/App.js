@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 import myEpicGame from './utils/MyEpicGame.json';
 import { ethers } from 'ethers';
 import Arena from './Components/Arena';
+import LoadingIndicator from './Components/LoadingIndicator';
 
 // Constants
 const TWITTER_HANDLE = 'owanikin';
@@ -16,6 +17,7 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
 
   const [characterNFT, setCharacterNFT] = useState(null)
+  const [isLoading, setIsLoading] = useState(false);
 
   // Actions that will run on component load. Since it will take some time, we should declare it as async
   const checkIfWalletIsConnected = async () => {
@@ -47,6 +49,11 @@ const App = () => {
   };
 
   const renderContent = () => {
+
+    // If the app is currently loading, just render out LoadingIndicator
+    if (isLoading) {
+      return <LoadingIndicator />
+    }
     
     // If user has not connected to app, show Connect To Wallet
     if (!currentAccount) {
@@ -67,7 +74,7 @@ const App = () => {
 
       // If there is a connected wallet and characterNFT, its time to baller!
     } else if (currentAccount && characterNFT) {
-      return <Arena characterNFT={characterNFT} />
+      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />
     }
   };
 
@@ -78,16 +85,30 @@ const App = () => {
 
       if (!ethereum) {
         alert('Get MetaMask!');
+        // We set isLoading here because we use return in the next line
+        setIsLoading(false);
         return;
+      } else {
+        console.log('We have the ethereum object', ethereum);
+
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          console.log('Found an authorized account:', account);
+          setCurrentAccount(account);
+        } else {
+          console.log('No authorized account found');
+        }
       }
       // Request method access to account.
-      const accounts = await ethereum.request({
-        method: 'eth_requestAccounts',
-      });
+      // const accounts = await ethereum.request({
+      //   method: 'eth_requestAccounts',
+      // });
 
-      // This should print out public address once we authorize Metamask.
-      console.log('Connected', accounts[0]);
-      setCurrentAccount(accounts[0]);
+      // // This should print out public address once we authorize Metamask.
+      // console.log('Connected', accounts[0]);
+      // setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
     }
@@ -106,6 +127,8 @@ const App = () => {
         console.log(error)
       }
     }
+    setIsLoading(true);
+    checkIfWalletIsConnected();
   }, []);
 
   useEffect(() => {
@@ -122,13 +145,20 @@ const App = () => {
         signer
       );
 
-      const txn = await gameContract.checkIfUserHasNFT();
-      if (txn.name) {
-        console.log("User has character NFT");
-        setCharacterNFT(transformCharacterData(txn));
-      } else {
-        console.log('No character NFT found');
+      const characterNFT = await gameContract.checkIfUserHasNFT();
+      if (characterNFT.name) {
+        console.log('User has character NFT');
+        setCharacterNFT(transformCharacterData(characterNFT));
       }
+      setIsLoading(false);
+
+      // const txn = await gameContract.checkIfUserHasNFT();
+      // if (txn.name) {
+      //   console.log("User has character NFT");
+      //   setCharacterNFT(transformCharacterData(txn));
+      // } else {
+      //   console.log('No character NFT found');
+      // }
     };
 
     // We only want to run this, if we have a connected wallet
