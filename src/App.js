@@ -5,6 +5,7 @@ import SelectCharacter from './Components/SelectCharacter';
 import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 import myEpicGame from './utils/MyEpicGame.json';
 import { ethers } from 'ethers';
+import Arena from './Components/Arena';
 
 // Constants
 const TWITTER_HANDLE = 'owanikin';
@@ -63,6 +64,10 @@ const App = () => {
       // If user has connected to app, and does not have a character NFT. Show SelectCharacter Component
     } else if (currentAccount && !characterNFT) {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />
+
+      // If there is a connected wallet and characterNFT, its time to baller!
+    } else if (currentAccount && characterNFT) {
+      return <Arena characterNFT={characterNFT} />
     }
   };
 
