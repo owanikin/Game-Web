@@ -23,10 +23,11 @@ const App = () => {
   const checkIfWalletIsConnected = async () => {
       try {
         // Make sure we have access to window.ethereum
-      const { ethereum } = window;
+        const { ethereum } = window;
 
       if (!ethereum) {
         console.log("Make sure you have MetaMask!");
+        setIsLoading(false);
         return;
         } else {
           console.log("We have the ethereum object", ethereum);
@@ -46,6 +47,7 @@ const App = () => {
       } catch (error) {
         console.log(error);
       }  
+      setIsLoading(false)
   };
 
   const renderContent = () => {
@@ -60,8 +62,8 @@ const App = () => {
       return (
         <div className="connect-wallet-container">
           <img
-              src="https://64.media.tumblr.com/tumblr_mbia5vdmRd1r1mkubo1_500.gifv"
-              alt="Monty Python Gif"
+              src="https://media3.giphy.com/media/rIa2LxrCKxMz3oOEtH/giphy.gif?cid=ecf05e47fccioq2req07n243kzx7muz77fxws6wrpcu45o9e&rid=giphy.gif&ct=g"
+              alt="Mortal Kombat"
             />
             <button className="cta-button connect-wallet-button" onClick={connectWalletAction}>
               Connect Wallet To Get Started
